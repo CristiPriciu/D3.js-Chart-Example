@@ -1,0 +1,116 @@
+<!doctype html>
+<meta charset="utf-8"/>
+<html>
+<head>
+	<title>D3 TEST 3</title>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="d3script.js"></script> 
+	<style>
+
+	.barHover:hover {
+		fill: rgba(154, 189, 223, 1);
+	}
+
+</style>
+</head>
+<body>
+	<div id="barChartContainer" style="width: 700px; height: 350px;">
+		<svg id="barChart"></svg>
+	</div>
+	<script>
+		var numbersDataset = [100000,85000,70000,65000,50000,48000,45000,42000,39000, 35000, 34000, 25000, 20000, 15800, 9000];
+				var labelsDataset = ["Al Hoceima", "Chefchaouen", "Fahs-Anjra", "Larache", "M'diq-Fnideq", "Ouezzane", "Tangier-Assilah", "Tetouan", "Berkane", "Driouch", "Figuig", "Guercif", "Jerada", "Nador", "Oujda-Angad"];
+				var svgWidth = $("#barChartContainer").width();
+				var svgHeight = $("#barChartContainer").height();
+				var barPadding = 5;
+				var barWidth = ((svgWidth - 33) / numbersDataset.length);
+				var svg = d3.select("#barChart")
+					.attr("width", svgWidth + 20)
+					.attr("height", svgHeight + 25);
+				
+				//Axa y
+				var yScale = d3.scaleLinear() //scaleaza valorile din dataset
+					.domain([0, d3.max(numbersDataset)])
+					.range([0, svgHeight - 61]);
+				
+				var yScaleForAxisY = d3.scaleLinear() //scaleaza tick-urile de pe axa y
+					.domain([0, d3.max(numbersDataset)])
+					.range([svgHeight - 30, 30]);
+
+				var y_axis = d3.axisLeft() //axa cu gradatii y
+					.scale(yScaleForAxisY);
+
+				//Axa x	
+				var xScale = d3.scaleBand()
+					.domain(labelsDataset)  
+					.range([30, svgWidth]);
+
+				var xAxis = d3.axisBottom(xScale)
+					.tickSize(5);
+
+				//Barele
+				var barChart = svg.selectAll("rect") 
+					.data(numbersDataset) 
+					.enter()
+					.append("rect")
+					.attr("y", function(d){  
+						return svgHeight - yScale(d);
+						})
+					.attr("height", function(d){
+						return yScale(d);
+						})
+					.attr("width", barWidth - barPadding) 
+					.attr("fill", "rgba(68, 120, 170, 1)")
+					.attr("class", "barHover")
+					.attr("transform", function (d, i) {
+						var translate = [(barWidth * i) + 47, -20];
+						return "translate("+ translate +")";
+						})
+					.append("title")
+					.text((d, i) => "Income from region " + labelsDataset[i] + " is " + d);	
+
+					//bar_cx si bar_cy sunt punctul in jurul caruia se invarte text-ul de deasupra barelor
+				var bar_cx = (d) => svgHeight - yScale(d) -21;
+				var bar_cy = (d, i) => (barWidth * i) + 47;
+				//numerele deasupra barelor	
+				var barText = svg.selectAll("text") 
+					.data(numbersDataset)
+	       			.enter()
+	       			.append("text")
+	       			.text((d) => d)
+	       			.attr("y", (d, i) => svgHeight - yScale(d) - 21)
+	       			.attr("x", (d, i) => (barWidth * i) + 47)
+	       			.style("font-size", "12px")
+	       			// .attr('transform', 'rotate(-90)')
+		            // .attr("triangle_cx", (d) => svgHeight - yScale(d) -21)
+		            // .attr("triangle_cy", (d,i) =>(barWidth * i) + 47)
+		         	.transition()
+	      			.attr('transform' , 'rotate(0, '+bar_cx+',' +bar_cy+') ');
+
+	       		//adauga axa cu gradatii y	
+				svg.append("g")   
+					.attr("transform", "translate(44, 10)")
+					.call(y_axis);
+
+				//titlul	
+				svg.append("text")   
+			        .attr("x", (svgWidth / 2))             
+			        .attr("y", 0 + 20)
+			        .attr("text-anchor", "middle")  
+			        .style("font-size", "16px")  
+			        .style("text-transform", "uppercase")
+			        .text("Sales by city");
+			   
+			    //adauga axa x
+				svg.append("g")
+			      .attr("transform", "translate(14," + (svgHeight - 20) + ")")
+			      .call(xAxis)
+			      .selectAll("text")	
+			      .style("text-anchor", "end")
+			      .attr("dx", "-.10em")
+			      .attr("dy", ".50em")
+			      .attr("transform", "rotate(-25)");
+	</script>
+	</body>
+	</html>
